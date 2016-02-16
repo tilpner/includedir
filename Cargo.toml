@@ -1,0 +1,8 @@
+[package]
+name = "includedir"
+version = "0.1.0"
+authors = ["Till Höppner <till@hoeppner.ws>"]
+
+[dependencies]
+walkdir = "0.1.5"
+phf_codegen = "0.7.12"

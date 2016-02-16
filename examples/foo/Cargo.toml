@@ -1,0 +1,11 @@
+[package]
+name = "foo"
+version = "0.1.0"
+authors = ["Till Höppner <till@hoeppner.ws>"]
+build = "build.rs"
+
+[dependencies]
+phf = "*"
+
+[build-dependencies.includedir]
+path = "../.."
