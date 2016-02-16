@@ -3,6 +3,8 @@ name = "foo"
 version = "0.1.0"
 authors = ["Till Höppner <till@hoeppner.ws>"]
 build = "build.rs"
+include = ["data"]
+publish = false
 
 [dependencies]
 phf = "0.7.12"
