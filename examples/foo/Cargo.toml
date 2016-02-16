@@ -5,7 +5,7 @@ authors = ["Till Höppner <till@hoeppner.ws>"]
 build = "build.rs"
 
 [dependencies]
-phf = "*"
+phf = "0.7.12"
 
-[build-dependencies.includedir]
-path = "../.."
+[build-dependencies]
+includedir = "0.1.1"
