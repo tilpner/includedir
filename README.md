@@ -7,6 +7,14 @@ includedir
 
 Include a directory in your Rust binary, e.g. static files for your web server or assets for your game.
 
+## Features
+
+* [x] Automatically compile data into binary
+* [x] Use [rust-phf](https://github.com/sfackler/rust-phf) for efficient lookup
+* [ ] Wrapping API around the phf map, to abstract away additional features
+* [ ] Compression
+* [ ] Reading from source files for debug builds
+
 ## Example
 
 **Cargo.toml**
