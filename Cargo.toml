@@ -1,7 +1,7 @@
 [package]
 name = "includedir"
 description = "Include a whole directory tree at compile time!"
-tags = ["include", "tree", "directory", "build", "static"]
+keywords = ["include", "tree", "directory", "build", "static"]
 version = "0.1.1"
 authors = ["Till Höppner <till@hoeppner.ws>"]
 license = "MIT"
