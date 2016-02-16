@@ -1,7 +1,12 @@
 [package]
 name = "includedir"
-version = "0.1.0"
+description = "Include a whole directory tree at compile time!"
+tags = ["include", "tree", "directory", "build", "static"]
+version = "0.1.1"
 authors = ["Till Höppner <till@hoeppner.ws>"]
+license = "MIT"
+homepage = "https://github.com/tilpner/includedir"
+repository = "https://github.com/tilpner/includedir"
 
 [dependencies]
 walkdir = "0.1.5"
