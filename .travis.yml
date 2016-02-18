@@ -1,5 +1,9 @@
 language: rust
+sudo: false
 rust:
   - stable
   - beta
   - nightly
+script:
+  - cd codegen && cargo test
+  - cd lib && cargo test
