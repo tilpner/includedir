@@ -5,5 +5,5 @@ rust:
   - beta
   - nightly
 script:
-  - cd codegen && cargo test
-  - cd lib && cargo test
+  - (cd codegen && cargo test)
+  - (cd lib && cargo test)
