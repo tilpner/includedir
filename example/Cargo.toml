@@ -1,0 +1,17 @@
+[package]
+name = "foo"
+version = "0.1.0"
+authors = ["Till Höppner <till@hoeppner.ws>"]
+build = "build.rs"
+include = ["data", "data/*", "data/**"]
+publish = false
+
+[dependencies]
+phf = "0.7.12"
+# includedir = "0.1.1"
+includedir = { path = "../lib" }
+
+[build-dependencies]
+# includedir = "0.1.1"
+includedir = { path = "../lib" }
+includedir_codegen = { path = "../codegen" }

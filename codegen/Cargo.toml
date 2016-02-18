@@ -1,6 +1,6 @@
 [package]
-name = "includedir"
-description = "Include a whole directory tree at compile time!"
+name = "includedir_codegen"
+description = "Include a whole directory tree at compile time! - Compile time part"
 keywords = ["include", "tree", "directory", "build", "static"]
 version = "0.1.1"
 authors = ["Till Höppner <till@hoeppner.ws>"]
@@ -11,3 +11,4 @@ repository = "https://github.com/tilpner/includedir"
 [dependencies]
 walkdir = "0.1.5"
 phf_codegen = "0.7.12"
+flate2 = "0.2.13"

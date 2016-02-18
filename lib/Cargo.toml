@@ -1,0 +1,17 @@
+[package]
+name = "includedir"
+description = "Include a whole directory tree at compile time! - Runtime part"
+keywords = ["include", "tree", "directory", "build", "static"]
+version = "0.1.1"
+authors = ["Till Höppner <till@hoeppner.ws>"]
+license = "MIT"
+homepage = "https://github.com/tilpner/includedir"
+repository = "https://github.com/tilpner/includedir"
+
+[features]
+default = ["flate2"]
+
+[dependencies]
+phf = "0.7.12"
+
+flate2 = { version = "*", optional = true }
