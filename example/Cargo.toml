@@ -8,9 +8,7 @@ publish = false
 
 [dependencies]
 phf = "0.7.12"
-# includedir = "0.1.1"
-includedir = { default-features = true, path = "../lib" }
+includedir = "0.2.0"
 
 [build-dependencies]
-# includedir_codegen = "0.1.1"
-includedir_codegen = { path = "../codegen" }
+includedir_codegen = "0.2.0"

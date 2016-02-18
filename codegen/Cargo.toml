@@ -2,7 +2,7 @@
 name = "includedir_codegen"
 description = "Include a whole directory tree at compile time! - Compile time part"
 keywords = ["include", "tree", "directory", "build", "static"]
-version = "0.1.1"
+version = "0.2.0"
 authors = ["Till Höppner <till@hoeppner.ws>"]
 license = "MIT"
 homepage = "https://github.com/tilpner/includedir"

@@ -11,8 +11,8 @@ Include a directory in your Rust binary, e.g. static files for your web server o
 
 * [x] Automatically compile data into binary
 * [x] Use [rust-phf](https://github.com/sfackler/rust-phf) for efficient lookup
-* [ ] Wrapping API around the phf map, to abstract away additional features
-* [ ] Compression
+* [x] Wrapping API around the phf map, to abstract away additional features
+* [x] Compression, with optional crate "flate2"
 * [ ] Reading from source files for debug builds
 
 ## Example
@@ -28,31 +28,36 @@ include = ["data"]
 
 [dependencies]
 phf = "0.7.12"
+includedir = "0.2.0"
 
 [build-dependencies]
-includedir = "0.1.1"
+includedir_codegen = "0.2.0"
 ```
 
 **build.rs**
 
 ```rust
-extern crate includedir;
+extern crate includedir_codegen;
+
+use includedir_codegen::Compression;
 
 fn main() {
-    includedir::build("data").unwrap();
+    includedir_codegen::start("FILES")
+        .dir("data", Compression::Gzip)
+        .build("data.rs")
+        .unwrap();
 }
 ```
 
 **src/main.rs**
 
 ```rust
+extern crate includedir;
 extern crate phf;
 
-include!(concat!(env!("OUT_DIR"), "/dir_data.rs"));
+include!(concat!(env!("OUT_DIR"), "/data.rs"));
 
 fn main() {
-    for (k, v) in FILES.entries() {
-        println!("{}: {} bytes", k, v.len());
-    }
+    println!("{:?}", FILES.get("data/foo"))
 }
 ```
