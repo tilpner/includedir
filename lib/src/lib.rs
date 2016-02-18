@@ -1,9 +1,12 @@
 extern crate phf;
+
+#[cfg(feature = "flate2")]
 extern crate flate2;
 
 use std::borrow::{Borrow, Cow};
 use std::io::{self, Cursor, Error, ErrorKind, Read};
 
+#[cfg(feature = "flate2")]
 use flate2::FlateReadExt;
 
 pub enum Compression {
@@ -38,12 +41,15 @@ impl Files {
             Some(b) => {
                 match b.0 {
                     Compression::None => Ok(Cow::Borrowed(b.1)),
+                    #[cfg(feature = "flate2")]
                     Compression::Gzip => {
                         let mut r = try!(Cursor::new(b.1).gz_decode());
                         let mut v = Vec::new();
                         try!(r.read_to_end(&mut v));
                         Ok(Cow::Owned(v))
                     }
+                    #[cfg(not(feature = "flate2"))]
+                    Compression::Gzip => panic!("Feature 'flate2' not enabled"),
                 }
             }
             None => Err(Error::new(ErrorKind::NotFound, "Key not found")),
@@ -56,7 +62,10 @@ impl Files {
             Some(b) => {
                 match b.0 {
                     Compression::None => Ok(Box::new(Cursor::new(b.1))),
+                    #[cfg(feature = "flate2")]
                     Compression::Gzip => Ok(Box::new(try!(Cursor::new(b.1).gz_decode()))),
+                    #[cfg(not(feature = "flate2"))]
+                    Compression::Gzip => panic!("Feature 'flate2' not enabled"),
                 }
             }
             None => Err(Error::new(ErrorKind::NotFound, "Key not found")),
