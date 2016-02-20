@@ -2,7 +2,7 @@
 name = "includedir"
 description = "Include a whole directory tree at compile time! - Runtime part"
 keywords = ["include", "tree", "directory", "build", "static"]
-version = "0.2.0"
+version = "0.2.1"
 authors = ["Till Höppner <till@hoeppner.ws>"]
 license = "MIT"
 homepage = "https://github.com/tilpner/includedir"
