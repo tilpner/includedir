@@ -13,7 +13,7 @@ Include a directory in your Rust binary, e.g. static files for your web server o
 * [x] Use [rust-phf](https://github.com/sfackler/rust-phf) for efficient lookup
 * [x] Wrapping API around the phf map, to abstract away additional features
 * [x] Compression, with optional crate "flate2"
-* [ ] Reading from source files for debug builds
+* [x] Reading from source files for debug builds
 
 ## Example
 

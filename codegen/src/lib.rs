@@ -2,7 +2,7 @@ extern crate walkdir;
 extern crate phf_codegen;
 extern crate flate2;
 
-use std::{fmt, env, io};
+use std::{env, fmt, io};
 use std::borrow::{Borrow, Cow};
 use std::collections::HashMap;
 use std::fs::{self, File};
@@ -13,10 +13,11 @@ use walkdir::WalkDir;
 
 use flate2::FlateWriteExt;
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, PartialEq, Eq, Debug)]
 pub enum Compression {
     None,
     Gzip,
+    Passthrough,
 }
 
 impl fmt::Display for Compression {
@@ -24,6 +25,7 @@ impl fmt::Display for Compression {
         match *self {
             Compression::None => fmt.write_str("None"),
             Compression::Gzip => fmt.write_str("Gzip"),
+            Compression::Passthrough => panic!("Should not be called"),
         }
     }
 }
@@ -31,12 +33,14 @@ impl fmt::Display for Compression {
 pub struct IncludeDir {
     files: HashMap<String, (Compression, PathBuf)>,
     name: String,
+    passthrough: bool,
 }
 
 pub fn start(static_name: &str) -> IncludeDir {
     IncludeDir {
         files: HashMap::new(),
         name: static_name.to_owned(),
+        passthrough: false,
     }
 }
 
@@ -51,6 +55,12 @@ fn as_key(path: &str) -> Cow<str> {
 }
 
 impl IncludeDir {
+    /// Don't include any data, but read from the source directory instead.
+    pub fn passthrough(&mut self) -> &mut IncludeDir {
+        self.passthrough = true;
+        self
+    }
+
     /// Add a single file to the binary.
     /// With Gzip compression, the file will be encoded to OUT_DIR first.
     /// For chaining, it's not sensible to return a Result. If any to-be-included
@@ -65,7 +75,13 @@ impl IncludeDir {
     /// This function panics when CARGO_MANIFEST_DIR or OUT_DIR are not defined.
     pub fn add_file<P: AsRef<Path>>(&mut self, path: P, comp: Compression) -> io::Result<()> {
         let key = path.as_ref().to_string_lossy();
+
         match comp {
+            c if self.passthrough || c == Compression::Passthrough => {
+                self.files.insert(as_key(key.borrow()).into_owned(),
+                                  (Compression::Passthrough, PathBuf::new()));
+
+            }
             Compression::None => {
                 self.files.insert(as_key(key.borrow()).into_owned(),
                                   (comp, path.as_ref().clone().to_owned()));
@@ -85,6 +101,7 @@ impl IncludeDir {
                 self.files.insert(as_key(key.borrow()).into_owned(),
                                   (comp, out_path.to_owned()));
             }
+            _ => unreachable!(),
         }
         Ok(())
     }
@@ -122,17 +139,23 @@ impl IncludeDir {
                     \tfiles:  ",
                     self.name));
 
-        let entries: Vec<_> = self.files //accumulate_entries()
+        let entries: Vec<_> = self.files
                                   .iter()
                                   .map(|(name, &(ref comp, ref path))| {
                                       let include_path = format!("{}",
                                                                  base_path.join(path).display());
-                                      let code = format!("(Compression::{}, \
-                                                          include_bytes!(\"{}\") as &'static \
-                                                          [u8])",
-                                                         comp,
-                                                         as_key(&include_path));
-                                      (as_key(&name).into_owned(), code)
+                                      if comp == &Compression::Passthrough {
+                                          (as_key(&name).into_owned(),
+                                           "(Compression::Passthrough, &[] as &'static [u8])"
+                                               .to_owned())
+                                      } else {
+                                          let code = format!("(Compression::{}, \
+                                                              include_bytes!(\"{}\") as &'static \
+                                                              [u8])",
+                                                             comp,
+                                                             as_key(&include_path));
+                                          (as_key(&name).into_owned(), code)
+                                      }
                                   })
                                   .collect();
         let mut map: phf_codegen::Map<&str> = phf_codegen::Map::new();
