@@ -39,7 +39,7 @@ impl Files {
 
     /// Returns an iterator over all available file names.  Does not
     /// decompress any compressed data.
-    pub fn file_names(&self) -> FileNames {
+    pub fn file_names(&'static self) -> FileNames {
         FileNames { iter: self.files.keys() }
     }
 
@@ -91,13 +91,13 @@ impl Files {
 }
 
 /// Iterates over the file names available for `Files` object.
-pub struct FileNames<'a> {
-    /// Our internal iterator.  We wrap this in a nice struct so our
-    /// caller doesn't need to know the details.
-    iter: phf::map::Keys<'a, &'static str, (Compression, &'static [u8])>,
+pub struct FileNames {
+    // Our internal iterator.  We wrap this in a nice struct so our
+    // caller doesn't need to know the details.
+    iter: phf::map::Keys<'static, &'static str, (Compression, &'static [u8])>,
 }
 
-impl<'a> Iterator for FileNames<'a> {
+impl Iterator for FileNames {
     type Item = &'static str;
 
     fn next(&mut self) -> Option<Self::Item> {
