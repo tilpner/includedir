@@ -37,6 +37,12 @@ impl Files {
         self.files.contains_key(path)
     }
 
+    /// Returns an iterator over all available file names.  Does not
+    /// decompress any compressed data.
+    pub fn file_names(&self) -> FileNames {
+        FileNames { iter: self.files.keys() }
+    }
+
     pub fn get(&self, path: &str) -> io::Result<Cow<'static, [u8]>> {
         let key = as_key(path);
         match self.files.get(key.borrow() as &str) {
@@ -81,5 +87,20 @@ impl Files {
             }
             None => Err(Error::new(ErrorKind::NotFound, "Key not found")),
         }
+    }
+}
+
+/// Iterates over the file names available for `Files` object.
+pub struct FileNames<'a> {
+    /// Our internal iterator.  We wrap this in a nice struct so our
+    /// caller doesn't need to know the details.
+    iter: phf::map::Keys<'a, &'static str, (Compression, &'static [u8])>,
+}
+
+impl<'a> Iterator for FileNames<'a> {
+    type Item = &'static str;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.iter.next().map(|s| *s)
     }
 }
