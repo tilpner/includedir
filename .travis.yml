@@ -7,4 +7,4 @@ rust:
 script:
   - (cd codegen && cargo test)
   - (cd lib && cargo test)
-  - (cd example && cargo run)
+  - (cd example && cargo run && cargo test)
