@@ -2,7 +2,7 @@ includedir
 ===========
 
 [![Travis](https://img.shields.io/travis/tilpner/includedir.svg?style=flat-square)](https://travis-ci.org/tilpner/includedir)
-[![Appveyor](https://img.shields.io/appveyor/ci/tilpner/includedir.svg?label=appveyor)](https://ci.appveyor.com/project/tilpner/includedir)
+[![Appveyor](https://img.shields.io/appveyor/ci/tilpner/includedir.svg?label=appveyor?style=flat-square)](https://ci.appveyor.com/project/tilpner/includedir)
 [![Crates.io version](https://img.shields.io/crates/v/includedir.svg?style=flat-square)](https://crates.io/crates/includedir)
 [![docs.rs](https://docs.rs/includedir/badge.svg)](https://docs.rs/includedir)
 [![Crates.io license](https://img.shields.io/crates/l/includedir.svg?style=flat-square)](https://crates.io/crates/includedir)
