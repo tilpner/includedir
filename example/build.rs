@@ -9,7 +9,6 @@ fn main() {
     if env::var("PASSTHROUGH").is_ok() {
         cg.passthrough();
     }
-    cg.dir("data", Compression::Gzip)
-      .build("data.rs")
-      .unwrap();
+    cg.dir("data", Compression::Gzip);
+    cg.build("data.rs").unwrap();
 }

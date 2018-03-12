@@ -34,6 +34,7 @@ pub struct IncludeDir {
     files: HashMap<String, (Compression, PathBuf)>,
     name: String,
     passthrough: bool,
+    manifest_dir: PathBuf
 }
 
 pub fn start(static_name: &str) -> IncludeDir {
@@ -41,6 +42,7 @@ pub fn start(static_name: &str) -> IncludeDir {
         files: HashMap::new(),
         name: static_name.to_owned(),
         passthrough: false,
+        manifest_dir: Path::new(&env::var("CARGO_MANIFEST_DIR").expect("CARGO_MANIFEST_DIR is not set")).to_owned()
     }
 }
 
@@ -75,6 +77,7 @@ impl IncludeDir {
     /// This function panics when CARGO_MANIFEST_DIR or OUT_DIR are not defined.
     pub fn add_file<P: AsRef<Path>>(&mut self, path: P, comp: Compression) -> io::Result<()> {
         let key = path.as_ref().to_string_lossy();
+        println!("cargo:rerun-if-changed={}", self.manifest_dir.join(&path).display());
 
         match comp {
             c if self.passthrough || c == Compression::Passthrough => {
@@ -87,7 +90,7 @@ impl IncludeDir {
             }
             Compression::Gzip => {
                 // gzip encode file to OUT_DIR
-                let in_path = Path::new(&env::var("CARGO_MANIFEST_DIR").unwrap()).join(&path);
+                let in_path = self.manifest_dir.join(&path);
                 let mut in_file = BufReader::new(try!(File::open(&in_path)));
 
                 let out_path = Path::new(&env::var("OUT_DIR").unwrap()).join(&path);
@@ -127,8 +130,7 @@ impl IncludeDir {
         Ok(())
     }
 
-    pub fn build(&self, out_name: &str) -> io::Result<()> {
-        let base_path = Path::new(&env::var("CARGO_MANIFEST_DIR").unwrap()).to_owned();
+    pub fn build(self, out_name: &str) -> io::Result<()> {
         let out_path = Path::new(&env::var("OUT_DIR").unwrap()).join(out_name);
         let mut out_file = BufWriter::new(try!(File::create(&out_path)));
 
@@ -138,29 +140,22 @@ impl IncludeDir {
                     \tfiles:  ",
                     self.name));
 
-        let entries: Vec<_> = self.files
-                                  .iter()
-                                  .map(|(name, &(ref comp, ref path))| {
-                                      let include_path = format!("{}",
-                                                                 base_path.join(path).display());
-                                      if comp == &Compression::Passthrough {
-                                          (as_key(&name).into_owned(),
-                                           "(Compression::Passthrough, &[] as &'static [u8])"
-                                               .to_owned())
-                                      } else {
-                                          let code = format!("(Compression::{}, \
-                                                              include_bytes!(\"{}\") as &'static \
-                                                              [u8])",
-                                                             comp,
-                                                             as_key(&include_path));
-                                          (as_key(&name).into_owned(), code)
-                                      }
-                                  })
-                                  .collect();
-        let mut map: phf_codegen::Map<&str> = phf_codegen::Map::new();
-        for &(ref name, ref code) in &entries {
-            map.entry(&name, &code);
+        let mut map: phf_codegen::Map<String> = phf_codegen::Map::new();
+
+        for (name, (compression, path)) in self.files {
+            let include_path = format!("{}", self.manifest_dir.join(path).display());
+
+            if compression == Compression::Passthrough {
+                map.entry(as_key(&name).into_owned(),
+                          "(Compression::Passthrough, &[] as &'static [u8])");
+            } else {
+                map.entry(as_key(&name).into_owned(),
+                          &format!("(Compression::{}, \
+                                    include_bytes!(\"{}\") as &'static [u8])",
+                                   compression, as_key(&include_path)));
+            }
         }
+
         try!(map.build(&mut out_file));
 
         try!(write!(&mut out_file, "\n}};\n"));
