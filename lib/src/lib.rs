@@ -8,7 +8,7 @@ use std::io::{self, BufReader, Cursor, Error, ErrorKind, Read};
 use std::fs::File;
 
 #[cfg(feature = "flate2")]
-use flate2::FlateReadExt;
+use flate2::bufread::GzDecoder;
 
 pub enum Compression {
     None,
@@ -51,7 +51,7 @@ impl Files {
                     Compression::None => Ok(Cow::Borrowed(b.1)),
                     #[cfg(feature = "flate2")]
                     Compression::Gzip => {
-                        let mut r = try!(Cursor::new(b.1).gz_decode());
+                        let mut r = GzDecoder::new(Cursor::new(b.1));
                         let mut v = Vec::new();
                         try!(r.read_to_end(&mut v));
                         Ok(Cow::Owned(v))
@@ -77,7 +77,7 @@ impl Files {
                 match b.0 {
                     Compression::None => Ok(Box::new(Cursor::new(b.1))),
                     #[cfg(feature = "flate2")]
-                    Compression::Gzip => Ok(Box::new(try!(Cursor::new(b.1).gz_decode()))),
+                    Compression::Gzip => Ok(Box::new(GzDecoder::new(Cursor::new(b.1)))),
                     #[cfg(not(feature = "flate2"))]
                     Compression::Gzip => panic!("Feature 'flate2' not enabled"),
                     Compression::Passthrough => {

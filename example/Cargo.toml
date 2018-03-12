@@ -7,10 +7,8 @@ include = ["data", "data/*", "data/**"]
 publish = false
 
 [dependencies]
-phf = "0.7.16"
-# includedir = "0.2.0"
+phf = "0.7.21"
 includedir = { path = "../lib" }
 
 [build-dependencies]
-# includedir_codegen = "0.2.0"
 includedir_codegen = { path = "../codegen" }

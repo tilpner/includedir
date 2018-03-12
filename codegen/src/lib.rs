@@ -11,7 +11,7 @@ use std::path::{Path, PathBuf};
 
 use walkdir::WalkDir;
 
-use flate2::FlateWriteExt;
+use flate2::write::GzEncoder;
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 pub enum Compression {
@@ -80,7 +80,6 @@ impl IncludeDir {
             c if self.passthrough || c == Compression::Passthrough => {
                 self.files.insert(as_key(key.borrow()).into_owned(),
                                   (Compression::Passthrough, PathBuf::new()));
-
             }
             Compression::None => {
                 self.files.insert(as_key(key.borrow()).into_owned(),
@@ -94,7 +93,7 @@ impl IncludeDir {
                 let out_path = Path::new(&env::var("OUT_DIR").unwrap()).join(&path);
                 try!(fs::create_dir_all(&out_path.parent().unwrap()));
                 let out_file = BufWriter::new(try!(File::create(&out_path)));
-                let mut encoder = out_file.gz_encode(flate2::Compression::Default);
+                let mut encoder = GzEncoder::new(out_file, flate2::Compression::best());
 
                 try!(io::copy(&mut in_file, &mut encoder));
 

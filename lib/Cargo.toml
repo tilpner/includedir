@@ -12,6 +12,6 @@ repository = "https://github.com/tilpner/includedir"
 default = ["flate2"]
 
 [dependencies]
-phf = "0.7.16"
+phf = "0.7.21"
 
-flate2 = { version = "0.2.14", optional = true }
+flate2 = { version = "1.0.1", optional = true }
