@@ -2,13 +2,20 @@
 name = "includedir_codegen"
 description = "Include a whole directory tree at compile time! - Compile time part"
 keywords = ["include", "tree", "directory", "build", "static"]
-version = "0.2.2"
+categories = ["filesystem"]
+version = "0.3.0"
 authors = ["Till Höppner <till@hoeppner.ws>"]
-license = "MIT"
+license = "BSD-3-Clause"
 homepage = "https://github.com/tilpner/includedir"
 repository = "https://github.com/tilpner/includedir"
+documentation = "https://docs.rs/includedir_codegen"
+readme = "../README.md"
 
 [dependencies]
 walkdir = "2.1.4"
 phf_codegen = "0.7.21"
 flate2 = "1.0.1"
+
+[badges]
+travis-ci = { repository = "tilpner/includedir", branch = "master" }
+appveyor = { repository = "tilpner/includedir", branch = "master", service = "github" }

@@ -31,10 +31,10 @@ include = ["data"]
 
 [dependencies]
 phf = "0.7.21"
-includedir = "0.2.0"
+includedir = "0.3.0"
 
 [build-dependencies]
-includedir_codegen = "0.2.0"
+includedir_codegen = "0.3.0"
 ```
 
 **build.rs**
