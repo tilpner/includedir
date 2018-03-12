@@ -53,15 +53,15 @@ impl Files {
                     Compression::Gzip => {
                         let mut r = GzDecoder::new(Cursor::new(b.1));
                         let mut v = Vec::new();
-                        try!(r.read_to_end(&mut v));
+                        r.read_to_end(&mut v)?;
                         Ok(Cow::Owned(v))
                     }
                     #[cfg(not(feature = "flate2"))]
                     Compression::Gzip => panic!("Feature 'flate2' not enabled"),
                     Compression::Passthrough => {
-                        let mut r = BufReader::new(try!(File::open(path)));
+                        let mut r = BufReader::new(File::open(path)?);
                         let mut v = Vec::new();
-                        try!(r.read_to_end(&mut v));
+                        r.read_to_end(&mut v)?;
                         Ok(Cow::Owned(v))
                     }
                 }
@@ -81,7 +81,7 @@ impl Files {
                     #[cfg(not(feature = "flate2"))]
                     Compression::Gzip => panic!("Feature 'flate2' not enabled"),
                     Compression::Passthrough => {
-                        Ok(Box::new(BufReader::new(try!(File::open(path)))))
+                        Ok(Box::new(BufReader::new(File::open(path)?)))
                     }
                 }
             }

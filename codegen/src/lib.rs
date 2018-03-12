@@ -91,14 +91,14 @@ impl IncludeDir {
             Compression::Gzip => {
                 // gzip encode file to OUT_DIR
                 let in_path = self.manifest_dir.join(&path);
-                let mut in_file = BufReader::new(try!(File::open(&in_path)));
+                let mut in_file = BufReader::new(File::open(&in_path)?);
 
                 let out_path = Path::new(&env::var("OUT_DIR").unwrap()).join(&path);
-                try!(fs::create_dir_all(&out_path.parent().unwrap()));
-                let out_file = BufWriter::new(try!(File::create(&out_path)));
+                fs::create_dir_all(&out_path.parent().unwrap())?;
+                let out_file = BufWriter::new(File::create(&out_path)?);
                 let mut encoder = GzEncoder::new(out_file, flate2::Compression::best());
 
-                try!(io::copy(&mut in_file, &mut encoder));
+                io::copy(&mut in_file, &mut encoder)?;
 
                 self.files.insert(as_key(key.borrow()).into_owned(),
                                   (comp, out_path.to_owned()));
@@ -122,7 +122,7 @@ impl IncludeDir {
         for entry in WalkDir::new(path).follow_links(true).into_iter() {
             match entry {
                 Ok(ref e) if !e.file_type().is_dir() => {
-                    try!(self.add_file(e.path(), comp));
+                    self.add_file(e.path(), comp)?;
                 }
                 _ => (),
             }
@@ -132,13 +132,13 @@ impl IncludeDir {
 
     pub fn build(self, out_name: &str) -> io::Result<()> {
         let out_path = Path::new(&env::var("OUT_DIR").unwrap()).join(out_name);
-        let mut out_file = BufWriter::new(try!(File::create(&out_path)));
+        let mut out_file = BufWriter::new(File::create(&out_path)?);
 
-        try!(write!(&mut out_file,
-                    "use includedir::*;\n\
-                    pub static {}: Files = Files {{\n\
-                    \tfiles:  ",
-                    self.name));
+        write!(&mut out_file,
+               "use includedir::*;\n\
+                pub static {}: Files = Files {{\n\
+                    files:  ",
+                self.name)?;
 
         let mut map: phf_codegen::Map<String> = phf_codegen::Map::new();
 
@@ -156,9 +156,9 @@ impl IncludeDir {
             }
         }
 
-        try!(map.build(&mut out_file));
+        map.build(&mut out_file)?;
 
-        try!(write!(&mut out_file, "\n}};\n"));
+        write!(&mut out_file, "\n}};\n")?;
         Ok(())
     }
 }
