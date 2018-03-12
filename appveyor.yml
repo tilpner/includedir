@@ -2,7 +2,7 @@ environment:
   global:
     # This will be used as part of the zipfile name
     PROJECT_NAME: ilc
-    RUST_VERSION: 1.11.0
+    RUST_VERSION: 1.24.0
   matrix:
     - TARGET: i686-pc-windows-gnu
       MSYS2_BITS: 32
