@@ -30,7 +30,7 @@ build = "build.rs"
 include = ["data"]
 
 [dependencies]
-phf = "0.7.12"
+phf = "0.7.21"
 includedir = "0.2.0"
 
 [build-dependencies]
@@ -46,6 +46,7 @@ use includedir_codegen::Compression;
 
 fn main() {
     includedir_codegen::start("FILES")
+        .passthrough(env::var("PASSTHROUGH").is_ok())
         .dir("data", Compression::Gzip)
         .build("data.rs")
         .unwrap();

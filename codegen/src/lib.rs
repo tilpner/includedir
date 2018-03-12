@@ -58,8 +58,8 @@ fn as_key(path: &str) -> Cow<str> {
 
 impl IncludeDir {
     /// Don't include any data, but read from the source directory instead.
-    pub fn passthrough(&mut self) -> &mut IncludeDir {
-        self.passthrough = true;
+    pub fn passthrough(mut self, enabled: bool) -> IncludeDir {
+        self.passthrough = enabled;
         self
     }
 
@@ -67,7 +67,7 @@ impl IncludeDir {
     /// With Gzip compression, the file will be encoded to OUT_DIR first.
     /// For chaining, it's not sensible to return a Result. If any to-be-included
     /// files can't be found, or encoded, this function will panic!.
-    pub fn file<P: AsRef<Path>>(&mut self, path: P, comp: Compression) -> &mut IncludeDir {
+    pub fn file<P: AsRef<Path>>(mut self, path: P, comp: Compression) -> IncludeDir {
         self.add_file(path, comp).unwrap();
         self
     }
@@ -110,7 +110,7 @@ impl IncludeDir {
 
     /// Add a whole directory recursively to the binary.
     /// This function calls `file`, and therefore will panic! on missing files.
-    pub fn dir<P: AsRef<Path>>(&mut self, path: P, comp: Compression) -> &mut IncludeDir {
+    pub fn dir<P: AsRef<Path>>(mut self, path: P, comp: Compression) -> IncludeDir {
         self.add_dir(path, comp).unwrap();
         self
     }
