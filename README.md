@@ -31,10 +31,10 @@ include = ["data"]
 
 [dependencies]
 phf = "0.7.21"
-includedir = "0.3.0"
+includedir = "0.4.0"
 
 [build-dependencies]
-includedir_codegen = "0.3.0"
+includedir_codegen = "0.4.0"
 ```
 
 **build.rs**
@@ -46,7 +46,6 @@ use includedir_codegen::Compression;
 
 fn main() {
     includedir_codegen::start("FILES")
-        .passthrough(env::var("PASSTHROUGH").is_ok())
         .dir("data", Compression::Gzip)
         .build("data.rs")
         .unwrap();
@@ -59,9 +58,13 @@ fn main() {
 extern crate includedir;
 extern crate phf;
 
+use std::env;
+
 include!(concat!(env!("OUT_DIR"), "/data.rs"));
 
 fn main() {
+    FILES.set_passthrough(env::var_os("PASSTHROUGH").is_some());
+
     println!("{:?}", FILES.get("data/foo"))
 }
 ```

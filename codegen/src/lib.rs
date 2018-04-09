@@ -16,8 +16,7 @@ use flate2::write::GzEncoder;
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 pub enum Compression {
     None,
-    Gzip,
-    Passthrough,
+    Gzip
 }
 
 impl fmt::Display for Compression {
@@ -25,7 +24,6 @@ impl fmt::Display for Compression {
         match *self {
             Compression::None => fmt.write_str("None"),
             Compression::Gzip => fmt.write_str("Gzip"),
-            Compression::Passthrough => panic!("Should not be called"),
         }
     }
 }
@@ -33,7 +31,6 @@ impl fmt::Display for Compression {
 pub struct IncludeDir {
     files: HashMap<String, (Compression, PathBuf)>,
     name: String,
-    passthrough: bool,
     manifest_dir: PathBuf
 }
 
@@ -41,7 +38,6 @@ pub fn start(static_name: &str) -> IncludeDir {
     IncludeDir {
         files: HashMap::new(),
         name: static_name.to_owned(),
-        passthrough: false,
         manifest_dir: Path::new(&env::var("CARGO_MANIFEST_DIR").expect("CARGO_MANIFEST_DIR is not set")).to_owned()
     }
 }
@@ -57,12 +53,6 @@ fn as_key(path: &str) -> Cow<str> {
 }
 
 impl IncludeDir {
-    /// Don't include any data, but read from the source directory instead.
-    pub fn passthrough(mut self, enabled: bool) -> IncludeDir {
-        self.passthrough = enabled;
-        self
-    }
-
     /// Add a single file to the binary.
     /// With Gzip compression, the file will be encoded to OUT_DIR first.
     /// For chaining, it's not sensible to return a Result. If any to-be-included
@@ -80,10 +70,6 @@ impl IncludeDir {
         println!("cargo:rerun-if-changed={}", path.as_ref().display());
 
         match comp {
-            c if self.passthrough || c == Compression::Passthrough => {
-                self.files.insert(as_key(key.borrow()).into_owned(),
-                                  (Compression::Passthrough, PathBuf::new()));
-            }
             Compression::None => {
                 self.files.insert(as_key(key.borrow()).into_owned(),
                                   (comp, path.as_ref().clone().to_owned()));
@@ -103,7 +89,6 @@ impl IncludeDir {
                 self.files.insert(as_key(key.borrow()).into_owned(),
                                   (comp, out_path.to_owned()));
             }
-            _ => unreachable!(),
         }
         Ok(())
     }
@@ -145,19 +130,15 @@ impl IncludeDir {
         for (name, (compression, path)) in self.files {
             let include_path = format!("{}", self.manifest_dir.join(path).display());
 
-            if compression == Compression::Passthrough {
-                map.entry(as_key(&name).into_owned(),
-                          "(Compression::Passthrough, &[] as &'static [u8])");
-            } else {
-                map.entry(as_key(&name).into_owned(),
-                          &format!("(Compression::{}, \
-                                    include_bytes!(\"{}\") as &'static [u8])",
-                                   compression, as_key(&include_path)));
-            }
+            map.entry(as_key(&name).into_owned(),
+                      &format!("(Compression::{}, \
+                                include_bytes!(\"{}\") as &'static [u8])",
+                               compression, as_key(&include_path)));
         }
 
         map.build(&mut out_file)?;
 
+        write!(&mut out_file, ", passthrough: ::std::sync::atomic::AtomicBool::new(false)")?;
         write!(&mut out_file, "\n}};\n")?;
         Ok(())
     }

@@ -1,9 +1,12 @@
 extern crate includedir;
 extern crate phf;
 
+use std::env;
+
 include!(concat!(env!("OUT_DIR"), "/data.rs"));
 
 fn main() {
+    FILES.set_passthrough(env::var_os("PASSTHROUGH").is_some());
     println!("{:?}", FILES.get("data/foo"));
 
     for name in FILES.file_names() {
