@@ -11,6 +11,7 @@ use std::sync::atomic::{AtomicBool, Ordering};
 #[cfg(feature = "flate2")]
 use flate2::bufread::GzDecoder;
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Compression {
     None,
     Gzip
@@ -51,31 +52,29 @@ impl Files {
     }
 
     pub fn get(&self, path: &str) -> io::Result<Cow<'static, [u8]>> {
+        match self.get_raw(path) {
+            Ok((Compression::None, data)) => Ok(data),
+            Ok((Compression::Gzip, compressed)) => {
+                let mut r = GzDecoder::new(Cursor::new(compressed));
+                let mut v = Vec::new();
+                r.read_to_end(&mut v)?;
+                Ok(Cow::Owned(v))
+            },
+            Err(e) => Err(e)
+        }
+    }
+
+    pub fn get_raw(&self, path: &str) -> io::Result<(Compression, Cow<'static, [u8]>)> {
         if self.passthrough.load(Ordering::Relaxed) {
             let mut r = BufReader::new(File::open(path)?);
             let mut v = Vec::new();
             r.read_to_end(&mut v)?;
-            return Ok(Cow::Owned(v))
+            return Ok((Compression::None, Cow::Owned(v)));
         }
 
         let key = as_key(path);
-        match self.files.get(key.borrow() as &str) {
-            Some(b) => {
-                match b.0 {
-                    Compression::None => Ok(Cow::Borrowed(b.1)),
-                    #[cfg(feature = "flate2")]
-                    Compression::Gzip => {
-                        let mut r = GzDecoder::new(Cursor::new(b.1));
-                        let mut v = Vec::new();
-                        r.read_to_end(&mut v)?;
-                        Ok(Cow::Owned(v))
-                    }
-                    #[cfg(not(feature = "flate2"))]
-                    Compression::Gzip => panic!("Feature 'flate2' not enabled"),
-                }
-            }
-            None => Err(Error::new(ErrorKind::NotFound, "Key not found")),
-        }
+
+        self.files.get(key.borrow() as &str).map( |(c,d)| (*c, Cow::Owned((*d).into()))).ok_or(Error::new(ErrorKind::NotFound, "Key not found"))
     }
 
     pub fn read(&self, path: &str) -> io::Result<Box<Read>> {
