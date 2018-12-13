@@ -120,8 +120,7 @@ impl IncludeDir {
         let mut out_file = BufWriter::new(File::create(&out_path)?);
 
         write!(&mut out_file,
-               "use includedir::*;\n\
-                pub static {}: Files = Files {{\n\
+               "pub static {}: ::includedir::Files = ::includedir::Files {{\n\
                     files:  ",
                 self.name)?;
 
@@ -131,7 +130,7 @@ impl IncludeDir {
             let include_path = format!("{}", self.manifest_dir.join(path).display());
 
             map.entry(as_key(&name).into_owned(),
-                      &format!("(Compression::{}, \
+                      &format!("(::includedir::Compression::{}, \
                                 include_bytes!(\"{}\") as &'static [u8])",
                                compression, as_key(&include_path)));
         }
