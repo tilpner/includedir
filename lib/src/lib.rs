@@ -54,12 +54,16 @@ impl Files {
     pub fn get(&self, path: &str) -> io::Result<Cow<'static, [u8]>> {
         match self.get_raw(path) {
             Ok((Compression::None, data)) => Ok(data),
+            #[cfg(feature = "flate2")]
             Ok((Compression::Gzip, compressed)) => {
                 let mut r = GzDecoder::new(Cursor::new(compressed));
                 let mut v = Vec::new();
                 r.read_to_end(&mut v)?;
                 Ok(Cow::Owned(v))
             },
+            #[cfg(not(feature = "flate2"))]
+            Ok((Compression::Gzip, _)) => panic!("Feature 'flate2' not enabled"),
+
             Err(e) => Err(e)
         }
     }
@@ -69,12 +73,14 @@ impl Files {
             let mut r = BufReader::new(File::open(path)?);
             let mut v = Vec::new();
             r.read_to_end(&mut v)?;
-            return Ok((Compression::None, Cow::Owned(v)));
+            return Ok((Compression::None, Cow::Owned(v)))
         }
 
         let key = as_key(path);
 
-        self.files.get(key.borrow() as &str).map( |(c,d)| (*c, Cow::Owned((*d).into()))).ok_or(Error::new(ErrorKind::NotFound, "Key not found"))
+        self.files.get(key.borrow() as &str)
+            .map( |(c,d)| (*c, Cow::Owned((*d).into())))
+            .ok_or(Error::new(ErrorKind::NotFound, "Key not found"))
     }
 
     pub fn read(&self, path: &str) -> io::Result<Box<Read>> {
