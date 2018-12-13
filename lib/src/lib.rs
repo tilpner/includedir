@@ -62,9 +62,6 @@ impl Files {
                 r.read_to_end(&mut v)?;
                 Ok(Cow::Owned(v))
             },
-            #[cfg(not(feature = "flate2"))]
-            Ok((Compression::Gzip, _)) => panic!("Feature 'flate2' not enabled"),
-
             Err(e) => Err(e)
         }
     }
