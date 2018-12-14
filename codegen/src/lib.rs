@@ -72,7 +72,7 @@ impl IncludeDir {
         match comp {
             Compression::None => {
                 self.files.insert(as_key(key.borrow()).into_owned(),
-                                  (comp, path.as_ref().clone().to_owned()));
+                                  (comp, path.as_ref().to_owned()));
             }
             Compression::Gzip => {
                 // gzip encode file to OUT_DIR
