@@ -115,6 +115,6 @@ impl Iterator for FileNames {
     type Item = &'static str;
 
     fn next(&mut self) -> Option<Self::Item> {
-        self.iter.next().map(|s| *s)
+        self.iter.next().cloned()
     }
 }
