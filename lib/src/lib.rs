@@ -78,8 +78,8 @@ impl Files {
 
         let key = as_key(path);
 
-        self.files.get(key.borrow() as &str)
-            .map( |(c,d)| (*c, Cow::Owned((*d).into())))
+        self.files.get(&*key)
+            .map(|&(c,d)| (c, Cow::Owned(d.to_owned())))
             .ok_or(Error::new(ErrorKind::NotFound, "Key not found"))
     }
 
