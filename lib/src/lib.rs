@@ -80,7 +80,7 @@ impl Files {
 
         self.files.get(&*key)
             .map(|&(c,d)| (c, Cow::Owned(d.to_owned())))
-            .ok_or(Error::new(ErrorKind::NotFound, "Key not found"))
+            .ok_or_else(|| Error::new(ErrorKind::NotFound, "Key not found"))
     }
 
     pub fn read(&self, path: &str) -> io::Result<Box<Read>> {
