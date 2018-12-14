@@ -14,6 +14,7 @@ use flate2::bufread::GzDecoder;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Compression {
     None,
+    #[cfg(feature = "flate2")]
     Gzip
 }
 
@@ -61,9 +62,6 @@ impl Files {
                 r.read_to_end(&mut v)?;
                 Ok(Cow::Owned(v))
             },
-            #[cfg(not(feature = "flate2"))]
-            Ok((Compression::Gzip, _)) => panic!("Feature 'flate2' not enabled"),
-
             Err(e) => Err(e)
         }
     }
@@ -95,8 +93,6 @@ impl Files {
                     Compression::None => Ok(Box::new(Cursor::new(b.1))),
                     #[cfg(feature = "flate2")]
                     Compression::Gzip => Ok(Box::new(GzDecoder::new(Cursor::new(b.1)))),
-                    #[cfg(not(feature = "flate2"))]
-                    Compression::Gzip => panic!("Feature 'flate2' not enabled"),
                 }
             }
             None => Err(Error::new(ErrorKind::NotFound, "Key not found")),
