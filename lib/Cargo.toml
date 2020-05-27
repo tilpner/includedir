@@ -15,9 +15,9 @@ readme = "../README.md"
 default = ["flate2"]
 
 [dependencies]
-phf = "0.7.21"
+phf = "0.8.0"
 
-flate2 = { version = "1.0.1", optional = true }
+flate2 = { version = "1.0.14", optional = true }
 
 [badges]
 travis-ci = { repository = "tilpner/includedir", branch = "master" }

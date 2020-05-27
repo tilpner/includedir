@@ -121,26 +121,30 @@ impl IncludeDir {
 
         writeln!(&mut out_file, "#[allow(clippy::unreadable_literal)]")?;
 
-        write!(&mut out_file,
+        writeln!(&mut out_file,
                "pub static {}: ::includedir::Files = ::includedir::Files {{\n\
                     files:  ",
                 self.name)?;
 
-        let mut map: phf_codegen::Map<String> = phf_codegen::Map::new();
+        let mut map: phf_codegen::Map<&str> = phf_codegen::Map::new();
+        let entries: Vec<_> = self.files.iter()
+            .map(|(name, (compression, path))| {
+                let include_path = format!("{}", self.manifest_dir.join(path).display());
+                (as_key(&name).to_string(), (compression, as_key(&include_path).to_string()))
+            })
+            .collect();
 
-        for (name, (compression, path)) in self.files {
-            let include_path = format!("{}", self.manifest_dir.join(path).display());
-
-            map.entry(as_key(&name).into_owned(),
+        for (name, (compression, include_path)) in &entries {
+            map.entry(name,
                       &format!("(::includedir::Compression::{}, \
                                 include_bytes!(\"{}\") as &'static [u8])",
-                               compression, as_key(&include_path)));
+                               compression, include_path));
         }
 
-        map.build(&mut out_file)?;
+        writeln!(&mut out_file, "{}", map.build())?;
 
-        write!(&mut out_file, ", passthrough: ::std::sync::atomic::AtomicBool::new(false)")?;
-        write!(&mut out_file, "\n}};\n")?;
+        writeln!(&mut out_file, ", passthrough: ::std::sync::atomic::AtomicBool::new(false)")?;
+        writeln!(&mut out_file, "}};")?;
         Ok(())
     }
 }
