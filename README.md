@@ -29,11 +29,11 @@ build = "build.rs"
 include = ["data"]
 
 [dependencies]
-phf = "0.7.21"
-includedir = "0.5.0"
+phf = "0.8.0"
+includedir = "0.6.0"
 
 [build-dependencies]
-includedir_codegen = "0.5.0"
+includedir_codegen = "0.6.0"
 ```
 
 **build.rs**
