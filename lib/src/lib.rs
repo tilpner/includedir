@@ -81,7 +81,7 @@ impl Files {
             .ok_or_else(|| Error::new(ErrorKind::NotFound, "Key not found"))
     }
 
-    pub fn read(&self, path: &str) -> io::Result<Box<Read>> {
+    pub fn read(&self, path: &str) -> io::Result<Box<dyn Read>> {
         if self.passthrough.load(Ordering::Relaxed) {
             return Ok(Box::new(BufReader::new(File::open(path)?)))
         }

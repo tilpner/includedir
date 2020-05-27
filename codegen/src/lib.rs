@@ -87,7 +87,7 @@ impl IncludeDir {
                 io::copy(&mut in_file, &mut encoder)?;
 
                 self.files.insert(as_key(key.borrow()).into_owned(),
-                                  (comp, out_path.to_owned()));
+                                  (comp, out_path));
             }
         }
         Ok(())
